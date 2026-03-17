@@ -22,6 +22,8 @@ import { detectLanguage, transcribeAudio, translateText } from './services/apiSe
 
 const App = () => {
   const [theme, toggleTheme] = useTheme();
+  const [showInstallButton, setShowInstallButton] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [language, setLanguage] = useState(Language.AUTO_DETECT);
@@ -56,6 +58,19 @@ const App = () => {
       console.error('Failed to parse transcription history from localStorage', e);
       localStorage.removeItem('transcriptionHistory');
     }
+
+    // PWA Install prompt handler
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
   useEffect(() => {
@@ -349,6 +364,20 @@ const App = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    }
+    
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
+
   const hasEdits =
     viewingHistoryItem &&
     ((isDisplayingOriginal &&
@@ -389,6 +418,17 @@ const App = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Upload audio, get accurate transcriptions, and translate to English.
           </p>
+          
+          {/* PWA Install Button */}
+          {showInstallButton && (
+            <button
+              onClick={handleInstallClick}
+              className="mt-4 inline-flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-lg"
+            >
+              <DownloadIcon className="h-5 w-5" />
+              <span className="font-semibold">Install App</span>
+            </button>
+          )}
         </header>
 
         <main className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl p-6 md:p-8 space-y-6">
