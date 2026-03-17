@@ -383,8 +383,8 @@ const App = () => {
               {theme === 'light' ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
             </button>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
-            AI Audio Transcriber
+          <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
+            Digos Doctors Hospital AI Audio Transcriber
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Upload audio, get accurate transcriptions, and translate to English.
@@ -681,7 +681,7 @@ const App = () => {
 
         <footer className="text-center mt-8">
           <div className="text-xs text-gray-500 flex justify-center items-center space-x-2">
-            <span>&copy; {new Date().getFullYear()} AI Audio Transcriber.</span>
+            <span>&copy; {new Date().getFullYear()} Digos Doctors Hospital AI Audio Transcriber.</span>
             <span className="hidden sm:inline">|</span>
             <div className="flex flex-col sm:flex-row sm:space-x-2">
               <span>Version 1.2.0 (Build 20260223.1)</span>
