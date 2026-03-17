@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,9 +6,10 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+from services.gemini_service import gemini_service
 
 
 ROOT_DIR = Path(__file__).parent
@@ -65,6 +66,68 @@ async def get_status_checks():
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
     
     return status_checks
+
+# Transcription API Models
+class DetectLanguageRequest(BaseModel):
+    audio_base64: str
+    mime_type: str
+
+class DetectLanguageResponse(BaseModel):
+    language: str
+
+class TranscribeRequest(BaseModel):
+    audio_base64: str
+    mime_type: str
+    language: str
+
+class TranscribeResponse(BaseModel):
+    transcription: str
+
+class TranslateRequest(BaseModel):
+    text: str
+    source_language: str
+
+class TranslateResponse(BaseModel):
+    translated_text: str
+
+# Transcription endpoints
+@api_router.post("/detect-language", response_model=DetectLanguageResponse)
+async def detect_language(request: DetectLanguageRequest):
+    try:
+        language = await gemini_service.detect_language(
+            audio_base64=request.audio_base64,
+            mime_type=request.mime_type
+        )
+        return DetectLanguageResponse(language=language)
+    except Exception as e:
+        logger.error(f"Language detection error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/transcribe", response_model=TranscribeResponse)
+async def transcribe_audio(request: TranscribeRequest):
+    try:
+        transcription = await gemini_service.transcribe_audio(
+            audio_base64=request.audio_base64,
+            mime_type=request.mime_type,
+            language=request.language
+        )
+        return TranscribeResponse(transcription=transcription)
+    except Exception as e:
+        logger.error(f"Transcription error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/translate", response_model=TranslateResponse)
+async def translate_text(request: TranslateRequest):
+    try:
+        translated_text = await gemini_service.translate_text(
+            text=request.text,
+            source_language=request.source_language
+        )
+        return TranslateResponse(translated_text=translated_text)
+    except Exception as e:
+        logger.error(f"Translation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # Include the router in the main app
 app.include_router(api_router)
