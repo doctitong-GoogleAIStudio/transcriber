@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { CloseIcon, CheckIcon, DownloadIcon, CopyIcon } from './Icons';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { CloseIcon, CheckIcon, DownloadIcon, CopyIcon, LoadingSpinner } from './Icons';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
@@ -25,16 +25,34 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
   const [copied, setCopied] = useState(false);
   const [showPrivacyConfirm, setShowPrivacyConfirm] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  
+  const soapGenerationInProgress = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
       fetchContacts();
-      if (includeSOAP && !soapSummary && transcription) {
-        generateSOAPSummary();
-      } else {
-        generatePreview();
-      }
+    } else {
+      // Reset SOAP when modal closes
+      setSoapSummary(null);
+      soapGenerationInProgress.current = false;
     }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && includeSOAP && !soapSummary && transcription && !isGeneratingSOAP && !soapGenerationInProgress.current) {
+      console.log('🚀 Triggering SOAP generation from useEffect');
+      soapGenerationInProgress.current = true;
+      generateSOAPSummary();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, includeSOAP, transcription, soapSummary, isGeneratingSOAP]);
+
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🔄 Preview update triggered');
+      generatePreview();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, includeOriginal, includeTranslation, includeSOAP, transcription, originalTranscription, soapSummary]);
 
   const fetchContacts = async () => {
@@ -46,19 +64,25 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
     }
   };
 
-  const generateSOAPSummary = async () => {
+  const generateSOAPSummary = useCallback(async () => {
     if (!transcription || isGeneratingSOAP) return;
+    
+    console.log('🔍 Starting SOAP generation...');
+    console.log('Transcription length:', transcription.length);
+    console.log('Language:', language);
     
     setIsGeneratingSOAP(true);
     try {
+      console.log('📤 Sending request to /api/generate-soap');
       const response = await axios.post(`${API}/generate-soap`, {
         transcription: transcription,
         language: language
       });
+      console.log('✅ SOAP generated successfully:', response.data);
       setSoapSummary(response.data);
-      generatePreview(response.data);
     } catch (error) {
-      console.error('Error generating SOAP:', error);
+      console.error('❌ Error generating SOAP:', error);
+      console.error('Error details:', error.response?.data || error.message);
       // Fallback to template if generation fails
       setSoapSummary({
         subjective: 'AI generation failed. Please fill manually.',
@@ -66,13 +90,19 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
         assessment: 'AI generation failed. Please fill manually.',
         plan: 'AI generation failed. Please fill manually.'
       });
-      generatePreview(null);
     } finally {
       setIsGeneratingSOAP(false);
+      soapGenerationInProgress.current = false;
+      console.log('🏁 SOAP generation completed');
     }
-  };
+  }, [transcription, language, isGeneratingSOAP]);
 
-  const generatePreview = (soapData = soapSummary) => {
+  const generatePreview = useCallback(() => {
+    console.log('📋 Generating preview...');
+    console.log('includeSOAP:', includeSOAP);
+    console.log('soapSummary:', soapSummary);
+    console.log('isGeneratingSOAP:', isGeneratingSOAP);
+    
     let content = '';
     
     if (fileName) {
@@ -92,18 +122,18 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
 
     if (includeSOAP) {
       content += `SOAP SUMMARY:\n\n`;
-      if (soapData && !isGeneratingSOAP) {
-        content += `S (Subjective): ${soapData.subjective}\n\n`;
-        content += `O (Objective): ${soapData.objective}\n\n`;
-        content += `A (Assessment): ${soapData.assessment}\n\n`;
-        content += `P (Plan): ${soapData.plan}\n\n`;
+      if (soapSummary && !isGeneratingSOAP) {
+        console.log('✅ Using generated SOAP summary');
+        content += `S (Subjective): ${soapSummary.subjective}\n\n`;
+        content += `O (Objective): ${soapSummary.objective}\n\n`;
+        content += `A (Assessment): ${soapSummary.assessment}\n\n`;
+        content += `P (Plan): ${soapSummary.plan}\n\n`;
       } else if (isGeneratingSOAP) {
-        content += `Generating AI-powered SOAP summary...\n\n`;
+        console.log('⏳ SOAP is being generated...');
+        content += `⏳ Generating AI-powered SOAP summary...\n\n`;
       } else {
-        content += `S (Subjective): [Add patient's description]\n`;
-        content += `O (Objective): [Add clinical findings]\n`;
-        content += `A (Assessment): [Add diagnosis]\n`;
-        content += `P (Plan): [Add treatment plan]\n\n`;
+        console.log('⚠️ SOAP not yet generated');
+        content += `⏳ AI-powered SOAP will be generated automatically...\n\n`;
       }
     }
 
@@ -112,7 +142,7 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
     content += '© ' + new Date().getFullYear() + ' Digos Doctors Hospital\n';
 
     setPreviewContent(content);
-  };
+  }, [fileName, language, includeOriginal, transcription, includeTranslation, originalTranscription, includeSOAP, soapSummary, isGeneratingSOAP]);
 
   const filteredContacts = contacts.filter(contact =>
     contact.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
