@@ -18,6 +18,8 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
   const [includeOriginal, setIncludeOriginal] = useState(true);
   const [includeTranslation, setIncludeTranslation] = useState(false);
   const [includeSOAP, setIncludeSOAP] = useState(false);
+  const [soapSummary, setSoapSummary] = useState(null);
+  const [isGeneratingSOAP, setIsGeneratingSOAP] = useState(false);
   const [shareFormat, setShareFormat] = useState('plain_text');
   const [previewContent, setPreviewContent] = useState('');
   const [copied, setCopied] = useState(false);
@@ -27,9 +29,13 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
   useEffect(() => {
     if (isOpen) {
       fetchContacts();
-      generatePreview();
+      if (includeSOAP && !soapSummary && transcription) {
+        generateSOAPSummary();
+      } else {
+        generatePreview();
+      }
     }
-  }, [isOpen, includeOriginal, includeTranslation, includeSOAP, transcription, originalTranscription]);
+  }, [isOpen, includeOriginal, includeTranslation, includeSOAP, transcription, originalTranscription, soapSummary]);
 
   const fetchContacts = async () => {
     try {
@@ -40,7 +46,33 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
     }
   };
 
-  const generatePreview = () => {
+  const generateSOAPSummary = async () => {
+    if (!transcription || isGeneratingSOAP) return;
+    
+    setIsGeneratingSOAP(true);
+    try {
+      const response = await axios.post(`${API}/generate-soap`, {
+        transcription: transcription,
+        language: language
+      });
+      setSoapSummary(response.data);
+      generatePreview(response.data);
+    } catch (error) {
+      console.error('Error generating SOAP:', error);
+      // Fallback to template if generation fails
+      setSoapSummary({
+        subjective: 'AI generation failed. Please fill manually.',
+        objective: 'AI generation failed. Please fill manually.',
+        assessment: 'AI generation failed. Please fill manually.',
+        plan: 'AI generation failed. Please fill manually.'
+      });
+      generatePreview(null);
+    } finally {
+      setIsGeneratingSOAP(false);
+    }
+  };
+
+  const generatePreview = (soapData = soapSummary) => {
     let content = '';
     
     if (fileName) {
@@ -59,11 +91,20 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
     }
 
     if (includeSOAP) {
-      content += `SOAP SUMMARY:\n`;
-      content += `S (Subjective): [Add patient's description]\n`;
-      content += `O (Objective): [Add clinical findings]\n`;
-      content += `A (Assessment): [Add diagnosis]\n`;
-      content += `P (Plan): [Add treatment plan]\n\n`;
+      content += `SOAP SUMMARY:\n\n`;
+      if (soapData && !isGeneratingSOAP) {
+        content += `S (Subjective): ${soapData.subjective}\n\n`;
+        content += `O (Objective): ${soapData.objective}\n\n`;
+        content += `A (Assessment): ${soapData.assessment}\n\n`;
+        content += `P (Plan): ${soapData.plan}\n\n`;
+      } else if (isGeneratingSOAP) {
+        content += `Generating AI-powered SOAP summary...\n\n`;
+      } else {
+        content += `S (Subjective): [Add patient's description]\n`;
+        content += `O (Objective): [Add clinical findings]\n`;
+        content += `A (Assessment): [Add diagnosis]\n`;
+        content += `P (Plan): [Add treatment plan]\n\n`;
+      }
     }
 
     content += '─'.repeat(40) + '\n';
@@ -338,10 +379,18 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
                   <Checkbox
                     id="include-soap"
                     checked={includeSOAP}
-                    onCheckedChange={setIncludeSOAP}
+                    onCheckedChange={(checked) => {
+                      setIncludeSOAP(checked);
+                      if (checked && !soapSummary) {
+                        setSoapSummary(null); // Reset to trigger generation
+                      }
+                    }}
                   />
-                  <label htmlFor="include-soap" className="text-sm cursor-pointer">
-                    SOAP Summary Template
+                  <label htmlFor="include-soap" className="text-sm cursor-pointer flex items-center space-x-2">
+                    <span>AI-Generated SOAP Summary</span>
+                    {isGeneratingSOAP && (
+                      <LoadingSpinner className="h-4 w-4 text-indigo-600" />
+                    )}
                   </label>
                 </div>
               </div>

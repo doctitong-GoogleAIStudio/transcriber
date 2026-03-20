@@ -133,6 +133,34 @@ async def translate_text(request: TranslateRequest):
         logger.error(f"Translation error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# SOAP Summary Generation
+class SOAPRequest(BaseModel):
+    transcription: str
+    language: str
+
+class SOAPResponse(BaseModel):
+    subjective: str
+    objective: str
+    assessment: str
+    plan: str
+
+@api_router.post("/generate-soap", response_model=SOAPResponse)
+async def generate_soap_summary(request: SOAPRequest):
+    try:
+        soap_dict = await gemini_service.generate_soap_summary(
+            transcription=request.transcription,
+            language=request.language
+        )
+        return SOAPResponse(**soap_dict)
+    except Exception as e:
+        logger.error(f"SOAP generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+        return TranslateResponse(translated_text=translated_text)
+    except Exception as e:
+        logger.error(f"Translation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ============================================================================
 # MESSENGER CONTACTS ENDPOINTS
 # ============================================================================
