@@ -753,7 +753,7 @@ const App = () => {
             <span>&copy; {new Date().getFullYear()} Digos Doctors Hospital AI Audio Transcriber.</span>
             <span className="hidden sm:inline">|</span>
             <div className="flex flex-col sm:flex-row sm:space-x-2">
-              <span>Version 1.2.0 (Build 20260223.1)</span>
+              <span>Version 1.2.1 (Build 20260320.1)</span>
               <button
                 onClick={() => setIsAboutModalOpen(true)}
                 className="hover:underline text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300"
