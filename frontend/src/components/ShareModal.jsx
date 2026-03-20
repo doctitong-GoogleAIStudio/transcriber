@@ -361,8 +361,27 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
               />
               <div className="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg">
                 {filteredContacts.length === 0 ? (
-                  <div className="p-3 text-sm text-gray-500 text-center">
-                    No contacts found. Add contacts in Settings.
+                  <div className="p-4 text-center">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                      📋 No contacts found
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mb-3">
+                      Add contacts in Settings to enable sharing
+                    </p>
+                    <button
+                      onClick={() => {
+                        onClose();
+                        // Use a simple approach - navigate to settings via state
+                        window.scrollTo(0, 0);
+                        setTimeout(() => {
+                          const settingsBtn = document.querySelector('button[aria-label="Settings"]');
+                          if (settingsBtn) settingsBtn.click();
+                        }, 100);
+                      }}
+                      className="text-xs bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700 transition"
+                    >
+                      ⚙️ Open Settings
+                    </button>
                   </div>
                 ) : (
                   filteredContacts.map((contact) => (
@@ -476,33 +495,54 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            onClick={handleOpenMessenger}
-            disabled={!selectedContact || isSharing}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-semibold"
-          >
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.15 2 11.25c0 2.92 1.45 5.53 3.73 7.24V22l3.38-1.85c.9.24 1.85.37 2.84.37 5.52 0 10-4.15 10-9.25S17.52 2 12 2zm1.08 12.44l-2.58-2.75-5.04 2.75 5.54-5.88 2.64 2.75 4.96-2.75-5.52 5.88z"/>
-            </svg>
-            <span>{isSharing ? 'Opening...' : 'Open Messenger'}</span>
-          </button>
+        <div className="mt-6 space-y-3">
+          {!selectedContact && filteredContacts.length === 0 && (
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
+              <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                💡 <strong>Tip:</strong> Add contacts in Settings to use Messenger sharing. You can still copy or download below.
+              </p>
+            </div>
+          )}
+          
+          {!selectedContact && filteredContacts.length > 0 && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                👆 Select a contact above to enable Messenger sharing
+              </p>
+            </div>
+          )}
+          
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={handleOpenMessenger}
+              disabled={!selectedContact || isSharing}
+              className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-semibold"
+              title={!selectedContact ? 'Select a contact first' : 'Open Facebook Messenger'}
+            >
+              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.15 2 11.25c0 2.92 1.45 5.53 3.73 7.24V22l3.38-1.85c.9.24 1.85.37 2.84.37 5.52 0 10-4.15 10-9.25S17.52 2 12 2zm1.08 12.44l-2.58-2.75-5.04 2.75 5.54-5.88 2.64 2.75 4.96-2.75-5.52 5.88z"/>
+              </svg>
+              <span>{isSharing ? 'Opening...' : 'Open Messenger'}</span>
+            </button>
 
-          <button
-            onClick={handleCopyText}
-            className="flex items-center space-x-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-          >
-            {copied ? <CheckIcon className="h-5 w-5 text-green-500" /> : <CopyIcon className="h-5 w-5" />}
-            <span>{copied ? 'Copied!' : 'Copy Text'}</span>
-          </button>
+            <button
+              onClick={handleCopyText}
+              className="flex items-center space-x-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+              title="Copy transcription to clipboard"
+            >
+              {copied ? <CheckIcon className="h-5 w-5 text-green-500" /> : <CopyIcon className="h-5 w-5" />}
+              <span>{copied ? 'Copied!' : 'Copy Text'}</span>
+            </button>
 
-          <button
-            onClick={handleDownloadFile}
-            className="flex items-center space-x-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition"
-          >
-            <DownloadIcon className="h-5 w-5" />
-            <span>Download {shareFormat === 'pdf' ? 'PDF' : 'TXT'}</span>
-          </button>
+            <button
+              onClick={handleDownloadFile}
+              className="flex items-center space-x-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition"
+              title={`Download as ${shareFormat === 'pdf' ? 'PDF' : 'TXT'}`}
+            >
+              <DownloadIcon className="h-5 w-5" />
+              <span>Download {shareFormat === 'pdf' ? 'PDF' : 'TXT'}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
