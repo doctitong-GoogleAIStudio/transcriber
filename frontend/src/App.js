@@ -17,8 +17,12 @@ import {
   InfoIcon,
   MicIcon,
   StopCircleIcon,
+  ShareIcon,
+  SettingsIcon,
 } from './components/Icons';
 import { detectLanguage, transcribeAudio, translateText } from './services/apiService';
+import { ShareModal } from './components/ShareModal';
+import { SharingSettings } from './components/SharingSettings';
 
 const App = () => {
   const [theme, toggleTheme] = useTheme();
@@ -39,6 +43,8 @@ const App = () => {
   const [viewingHistoryItem, setViewingHistoryItem] = useState(null);
   const [isDisplayingOriginal, setIsDisplayingOriginal] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -390,11 +396,27 @@ const App = () => {
     return 'Transcription Result';
   };
 
+  if (showSettings) {
+    return (
+      <div className="min-h-screen w-full p-4 font-sans text-gray-900 dark:text-gray-200">
+        <SharingSettings onClose={() => setShowSettings(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 font-sans text-gray-900 dark:text-gray-200">
       <div className="w-full max-w-2xl mx-auto">
         <header className="text-center mb-8 relative">
           <div className="absolute top-0 right-0 flex items-center space-x-1 sm:space-x-2">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700/50 transition-colors"
+              aria-label="Settings"
+              title="Sharing Settings"
+            >
+              <SettingsIcon className="h-6 w-6" />
+            </button>
             <button
               onClick={() => setIsAboutModalOpen(true)}
               className="p-2 rounded-full text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700/50 transition-colors"
@@ -618,6 +640,13 @@ const App = () => {
                     </button>
                   )}
                   <button
+                    onClick={() => setIsShareModalOpen(true)}
+                    className="flex items-center space-x-2 text-sm bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1.5 rounded-md hover:from-purple-600 hover:to-indigo-700 transition-all shadow-md"
+                  >
+                    <ShareIcon className="h-4 w-4" />
+                    <span>Share</span>
+                  </button>
+                  <button
                     onClick={handleCopyToClipboard}
                     className="flex items-center space-x-2 text-sm bg-gray-200 dark:bg-gray-700/80 px-3 py-1.5 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                   >
@@ -736,6 +765,14 @@ const App = () => {
         </footer>
       </div>
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        transcription={isDisplayingOriginal ? originalTranscription : transcription}
+        originalTranscription={isDisplayingOriginal ? transcription : originalTranscription}
+        language={language}
+        fileName={viewingHistoryItem?.fileName || selectedFile?.name}
+      />
     </div>
   );
 };
