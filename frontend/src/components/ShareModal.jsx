@@ -39,6 +39,15 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
   }, [isOpen]);
 
   useEffect(() => {
+    console.log('🔍 SOAP useEffect check:', {
+      isOpen,
+      includeSOAP,
+      hasSoapSummary: !!soapSummary,
+      hasTranscription: !!transcription,
+      isGeneratingSOAP,
+      inProgress: soapGenerationInProgress.current
+    });
+    
     if (isOpen && includeSOAP && !soapSummary && transcription && !isGeneratingSOAP && !soapGenerationInProgress.current) {
       console.log('🚀 Triggering SOAP generation from useEffect');
       soapGenerationInProgress.current = true;
@@ -411,8 +420,10 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
                     checked={includeSOAP}
                     onCheckedChange={(checked) => {
                       setIncludeSOAP(checked);
-                      if (checked && !soapSummary) {
+                      if (checked) {
+                        console.log('📋 SOAP checkbox checked - will generate');
                         setSoapSummary(null); // Reset to trigger generation
+                        soapGenerationInProgress.current = false;
                       }
                     }}
                   />
@@ -422,6 +433,17 @@ export const ShareModal = ({ isOpen, onClose, transcription, originalTranscripti
                       <LoadingSpinner className="h-4 w-4 text-indigo-600" />
                     )}
                   </label>
+                  {includeSOAP && !isGeneratingSOAP && !soapSummary && (
+                    <button
+                      onClick={() => {
+                        console.log('🔘 Manual SOAP generation triggered');
+                        generateSOAPSummary();
+                      }}
+                      className="text-xs bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
+                    >
+                      Generate Now
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
