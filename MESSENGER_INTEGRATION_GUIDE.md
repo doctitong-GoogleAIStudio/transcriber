@@ -109,7 +109,7 @@ If Messenger doesn't work, use these alternatives:
 ## Step-by-Step: First Time Messenger Share
 
 ### Preparation (One-time setup)
-1. Go to app: https://practical-bartik-1.preview.emergentagent.com
+1. Go to app: https://medical-transcribe-2.preview.emergentagent.com
 2. Click ⚙️ **Settings** (top right)
 3. Click "+ Add New Contact"
 4. Fill in:

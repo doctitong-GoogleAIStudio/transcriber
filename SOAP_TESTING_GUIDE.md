@@ -6,7 +6,7 @@ The **Share** button and **AI-Generated SOAP Summary** feature only appear **AFT
 ## Step-by-Step Testing Guide
 
 ### Step 1: Complete a Transcription
-1. Open the app: https://practical-bartik-1.preview.emergentagent.com
+1. Open the app: https://medical-transcribe-2.preview.emergentagent.com
 2. **Option A - Upload Audio File:**
    - Click "Click to upload" in the Upload Audio File section
    - Select an audio file (MP3, WAV, M4A, etc.)

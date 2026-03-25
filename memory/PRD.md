@@ -39,6 +39,7 @@ An AI-powered audio to text transcription application with multi-language suppor
 - **Responsive Design**: Works on desktop and mobile devices
 - **About Modal**: Information about the app and developer
 - **Action Buttons**: Copy, Download, Save edits functionality
+- **Upper Case Toggle**: Convert transcription text display to all uppercase letters (affects display, copy, and download)
 
 ### 7. Backend Integration
 - **FastAPI**: RESTful API endpoints
@@ -89,6 +90,6 @@ An AI-powered audio to text transcription application with multi-language suppor
 - Success indicators for copy/save actions
 
 ## Version
-- Version 1.2.0 (Build 20260223.1)
+- Version 1.2.2 (Build 20260325.1)
 - Developed by Vicente C. Cavalida, Jr. MD
 - Powered by Google Gemini

@@ -40,6 +40,7 @@ const App = () => {
   const [history, setHistory] = useState([]);
   const [viewingHistoryItem, setViewingHistoryItem] = useState(null);
   const [isDisplayingOriginal, setIsDisplayingOriginal] = useState(false);
+  const [isUpperCase, setIsUpperCase] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
@@ -199,6 +200,7 @@ const App = () => {
     setOriginalTranscription(null);
     setViewingHistoryItem(null);
     setIsDisplayingOriginal(false);
+    setIsUpperCase(false);
 
     try {
       const result = await transcribeAudio(selectedFile, language);
@@ -263,7 +265,8 @@ const App = () => {
   }, [transcription, originalTranscription, language, viewingHistoryItem, history, isDisplayingOriginal]);
 
   const handleCopyToClipboard = () => {
-    const textToCopy = isDisplayingOriginal ? originalTranscription : transcription;
+    let textToCopy = isDisplayingOriginal ? originalTranscription : transcription;
+    if (isUpperCase && textToCopy) textToCopy = textToCopy.toUpperCase();
     if (textToCopy) {
       navigator.clipboard.writeText(textToCopy);
       setIsCopied(true);
@@ -272,8 +275,9 @@ const App = () => {
   };
 
   const handleDownloadTranscription = () => {
-    const textToDownload = isDisplayingOriginal ? originalTranscription : transcription;
+    let textToDownload = isDisplayingOriginal ? originalTranscription : transcription;
     if (!textToDownload) return;
+    if (isUpperCase) textToDownload = textToDownload.toUpperCase();
 
     const baseFileName =
       viewingHistoryItem?.fileName || selectedFile?.name || 'transcription.txt';
@@ -324,6 +328,7 @@ const App = () => {
     setViewingHistoryItem(item);
     setError(null);
     setIsDisplayingOriginal(false);
+    setIsUpperCase(false);
   };
 
   const handleDeleteHistoryItem = (id) => {
@@ -628,6 +633,19 @@ const App = () => {
                     <span>Share</span>
                   </button>
                   <button
+                    onClick={() => setIsUpperCase(!isUpperCase)}
+                    data-testid="uppercase-toggle-btn"
+                    className={`flex items-center space-x-2 text-sm px-3 py-1.5 rounded-md transition-all ${
+                      isUpperCase
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        : 'bg-gray-200 dark:bg-gray-700/80 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    }`}
+                    title={isUpperCase ? 'Switch to original case' : 'Convert to upper case'}
+                  >
+                    <span className="font-bold text-xs" style={{ letterSpacing: '0.05em' }}>AA</span>
+                    <span>{isUpperCase ? 'UPPER' : 'Upper Case'}</span>
+                  </button>
+                  <button
                     onClick={handleCopyToClipboard}
                     className="flex items-center space-x-2 text-sm bg-gray-200 dark:bg-gray-700/80 px-3 py-1.5 rounded-md hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                   >
@@ -673,7 +691,8 @@ const App = () => {
               <textarea
                 value={isDisplayingOriginal ? originalTranscription || '' : transcription}
                 onChange={handleTextChange}
-                className="w-full h-48 bg-gray-50 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 rounded-lg p-4 text-gray-800 dark:text-gray-300 font-mono text-sm resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                data-testid="transcription-textarea"
+                className={`w-full h-48 bg-gray-50 dark:bg-gray-900/70 border border-gray-300 dark:border-gray-700 rounded-lg p-4 text-gray-800 dark:text-gray-300 font-mono text-sm resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500${isUpperCase ? ' uppercase' : ''}`}
                 placeholder="Result will appear here..."
               />
             </div>

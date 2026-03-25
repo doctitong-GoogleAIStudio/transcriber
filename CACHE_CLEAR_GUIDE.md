@@ -22,7 +22,7 @@ You're seeing **"SOAP Summary Template"** instead of **"AI-Generated SOAP Summar
 **Edge:**
 - Windows: `Ctrl + Shift + N`
 
-Then visit: https://practical-bartik-1.preview.emergentagent.com
+Then visit: https://medical-transcribe-2.preview.emergentagent.com
 
 ---
 
@@ -86,7 +86,7 @@ Then visit: https://practical-bartik-1.preview.emergentagent.com
 After clearing cache, verify you see the correct text:
 
 ### Step 1: Complete a Transcription
-1. Go to: https://practical-bartik-1.preview.emergentagent.com
+1. Go to: https://medical-transcribe-2.preview.emergentagent.com
 2. Click "Start Recording"
 3. Say: "Patient has headache"
 4. Click "Stop Recording"

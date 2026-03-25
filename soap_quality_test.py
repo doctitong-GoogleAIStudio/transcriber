@@ -6,7 +6,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://practical-bartik-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://medical-transcribe-2.preview.emergentagent.com/api"
 
 async def detailed_soap_verification():
     """Detailed verification of SOAP content quality"""

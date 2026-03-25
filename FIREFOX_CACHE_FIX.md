@@ -10,7 +10,7 @@
 
 ### Method 1: Private Window (Fastest - 10 seconds)
 1. Press `Ctrl + Shift + P` (Windows) or `Cmd + Shift + P` (Mac)
-2. Go to: https://practical-bartik-1.preview.emergentagent.com
+2. Go to: https://medical-transcribe-2.preview.emergentagent.com
 3. Complete transcription and check Share modal
 4. ✅ Should now show "AI-Generated SOAP Summary"
 
@@ -109,7 +109,7 @@ If nothing else works:
 3. **Restart Firefox**
    - Close Firefox completely
    - Reopen Firefox
-   - Go to app: https://practical-bartik-1.preview.emergentagent.com
+   - Go to app: https://medical-transcribe-2.preview.emergentagent.com
    - ✅ Should now show "AI-Generated SOAP Summary"
 
 ---
@@ -118,7 +118,7 @@ If nothing else works:
 
 After clearing cache, verify the fix:
 
-1. Go to: https://practical-bartik-1.preview.emergentagent.com
+1. Go to: https://medical-transcribe-2.preview.emergentagent.com
 2. Record or upload audio
 3. Click "Transcribe Audio"
 4. Wait for transcription

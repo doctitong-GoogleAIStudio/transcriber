@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 
 # Backend URL from frontend environment
-BACKEND_URL = "https://practical-bartik-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://medical-transcribe-2.preview.emergentagent.com/api"
 
 class SOAPTestSuite:
     def __init__(self):

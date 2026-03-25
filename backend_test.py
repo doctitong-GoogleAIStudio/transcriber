@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Backend URL from environment
-BACKEND_URL = "https://practical-bartik-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://medical-transcribe-2.preview.emergentagent.com/api"
 
 class BackendTester:
     def __init__(self):

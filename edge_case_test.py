@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-BACKEND_URL = "https://practical-bartik-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://medical-transcribe-2.preview.emergentagent.com/api"
 
 async def test_edge_cases():
     """Test edge cases and error handling"""

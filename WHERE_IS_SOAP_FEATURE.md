@@ -220,7 +220,7 @@ The "AI-Generated SOAP Summary" checkbox is **NOT** on the main page. It is **IN
 
 ## Test Right Now (5 Minutes)
 
-1. Go to: https://practical-bartik-1.preview.emergentagent.com
+1. Go to: https://medical-transcribe-2.preview.emergentagent.com
 2. Click "Start Recording"
 3. Say: "Patient has headache"
 4. Click "Stop Recording"
