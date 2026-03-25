@@ -37,6 +37,7 @@ export const AboutModal = ({ isOpen, onClose }) => {
             <li>📋 <strong>AI SOAP Notes:</strong> Auto-generate clinical SOAP summaries (Subjective, Objective, Assessment, Plan)</li>
             <li>📄 <strong>Multiple Formats:</strong> Export as plain text, TXT, or professional PDF documents</li>
             <li>💾 <strong>History:</strong> Save, edit, and manage transcription history locally</li>
+            <li>🔠 <strong>Upper Case:</strong> Toggle transcription text to all uppercase for easy reading and documentation</li>
             <li>📱 <strong>PWA Support:</strong> Install as app, works offline, mobile-optimized</li>
             <li>🌓 <strong>Dark Mode:</strong> Switch between light and dark themes</li>
           </ul>
@@ -59,9 +60,9 @@ export const AboutModal = ({ isOpen, onClose }) => {
         
         <div className="text-xs text-gray-500 border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
           <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">Developed by Vicente C. Cavalida, Jr. MD</p>
-          <p className="mb-1"><strong>Version:</strong> 1.2.1 (Build 20260320.1)</p>
+          <p className="mb-1"><strong>Version:</strong> 1.2.2 (Build 20260325.1)</p>
           <p className="mb-1"><strong>AI Model:</strong> Google Gemini 2.5 Flash</p>
-          <p className="mb-2"><strong>Core Features:</strong> Transcription • Translation • AI SOAP Generation • Export to PDF/TXT</p>
+          <p className="mb-2"><strong>Core Features:</strong> Transcription • Translation • AI SOAP Generation • Upper Case Toggle • Export to PDF/TXT</p>
           <p>&copy; {new Date().getFullYear()} Digos Doctors Hospital AI Audio Transcriber. All rights reserved.</p>
         </div>
       </div>
