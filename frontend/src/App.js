@@ -19,10 +19,13 @@ import {
   StopCircleIcon,
   ShareIcon,
 } from './components/Icons';
-import { detectLanguage, transcribeAudio, translateText } from './services/apiService';
+import { detectLanguage, transcribeAudio, translateText, fetchHistory, createHistoryItem, updateHistoryItem, deleteHistoryItem, clearAllHistory } from './services/apiService';
 import { ShareModal } from './components/ShareModal';
+import { useAuth } from './contexts/AuthContext';
+import AuthPage from './components/AuthPage';
 
 const App = () => {
+  const { isAuthenticated, loading: authLoading, user, logout } = useAuth();
   const [theme, toggleTheme] = useTheme();
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -53,15 +56,22 @@ const App = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    try {
-      const storedHistory = localStorage.getItem('transcriptionHistory');
-      if (storedHistory) {
-        setHistory(JSON.parse(storedHistory));
-      }
-    } catch (e) {
-      console.error('Failed to parse transcription history from localStorage', e);
-      localStorage.removeItem('transcriptionHistory');
-    }
+    if (!isAuthenticated) return;
+    // Load history from server
+    const loadHistory = async () => {
+      const serverHistory = await fetchHistory();
+      // Map server format to local format
+      const mapped = serverHistory.map((item) => ({
+        id: item.id,
+        fileName: item.file_name,
+        language: item.language,
+        transcription: item.transcription,
+        originalTranscription: item.original_transcription || null,
+        date: item.date,
+      }));
+      setHistory(mapped);
+    };
+    loadHistory();
 
     // PWA Install prompt handler
     const handleBeforeInstallPrompt = (e) => {
@@ -75,7 +85,7 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -207,17 +217,24 @@ const App = () => {
       setTranscription(result);
 
       const newHistoryItem = {
-        id: Date.now(),
         fileName: selectedFile.name,
         language: language,
         transcription: result,
         date: new Date().toLocaleString(),
       };
 
-      const updatedHistory = [newHistoryItem, ...history];
-      setHistory(updatedHistory);
-      localStorage.setItem('transcriptionHistory', JSON.stringify(updatedHistory));
-      setViewingHistoryItem(newHistoryItem);
+      const savedItem = await createHistoryItem(newHistoryItem);
+      const mappedItem = {
+        id: savedItem.id,
+        fileName: savedItem.file_name,
+        language: savedItem.language,
+        transcription: savedItem.transcription,
+        originalTranscription: savedItem.original_transcription || null,
+        date: savedItem.date,
+      };
+
+      setHistory((prev) => [mappedItem, ...prev]);
+      setViewingHistoryItem(mappedItem);
     } catch (err) {
       setError(err.message || 'An unexpected error occurred.');
     } finally {
@@ -242,6 +259,16 @@ const App = () => {
       setTranscription(translatedText);
       setIsDisplayingOriginal(false);
 
+      try {
+        await updateHistoryItem(viewingHistoryItem.id, {
+          transcription: translatedText,
+          originalTranscription: sourceText,
+          date: new Date().toLocaleString() + ' (translated)',
+        });
+      } catch (e) {
+        console.error('Failed to save translation to server:', e);
+      }
+
       const updatedHistory = history.map((item) =>
         item.id === viewingHistoryItem.id
           ? {
@@ -253,7 +280,6 @@ const App = () => {
           : item
       );
       setHistory(updatedHistory);
-      localStorage.setItem('transcriptionHistory', JSON.stringify(updatedHistory));
       setViewingHistoryItem(
         updatedHistory.find((item) => item.id === viewingHistoryItem.id) || null
       );
@@ -296,21 +322,27 @@ const App = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (!viewingHistoryItem) return;
+
+    const updateData = {
+      transcription: transcription,
+      originalTranscription: originalTranscription || undefined,
+      date: new Date().toLocaleString() + ' (edited)',
+    };
+
+    try {
+      await updateHistoryItem(viewingHistoryItem.id, updateData);
+    } catch (e) {
+      console.error('Failed to save changes to server:', e);
+    }
 
     const updatedHistory = history.map((item) =>
       item.id === viewingHistoryItem.id
-        ? {
-            ...item,
-            transcription: transcription,
-            originalTranscription: originalTranscription || undefined,
-            date: new Date().toLocaleString() + ' (edited)',
-          }
+        ? { ...item, ...updateData }
         : item
     );
     setHistory(updatedHistory);
-    localStorage.setItem('transcriptionHistory', JSON.stringify(updatedHistory));
 
     setViewingHistoryItem(
       updatedHistory.find((item) => item.id === viewingHistoryItem.id) || null
@@ -331,10 +363,14 @@ const App = () => {
     setIsUpperCase(false);
   };
 
-  const handleDeleteHistoryItem = (id) => {
+  const handleDeleteHistoryItem = async (id) => {
+    try {
+      await deleteHistoryItem(id);
+    } catch (e) {
+      console.error('Failed to delete history item:', e);
+    }
     const updatedHistory = history.filter((item) => item.id !== id);
     setHistory(updatedHistory);
-    localStorage.setItem('transcriptionHistory', JSON.stringify(updatedHistory));
     if (viewingHistoryItem?.id === id) {
       setViewingHistoryItem(null);
       setTranscription('');
@@ -342,14 +378,18 @@ const App = () => {
     }
   };
 
-  const handleClearHistory = () => {
+  const handleClearHistory = async () => {
     if (
       window.confirm(
         'Are you sure you want to clear the entire transcription history? This action cannot be undone.'
       )
     ) {
+      try {
+        await clearAllHistory();
+      } catch (e) {
+        console.error('Failed to clear history:', e);
+      }
       setHistory([]);
-      localStorage.removeItem('transcriptionHistory');
       setViewingHistoryItem(null);
       setTranscription('');
       setOriginalTranscription(null);
@@ -399,6 +439,14 @@ const App = () => {
   };
 
   return (
+    <>
+    {authLoading ? (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <LoadingSpinner className="h-8 w-8 text-indigo-500" />
+      </div>
+    ) : !isAuthenticated ? (
+      <AuthPage />
+    ) : (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 font-sans text-gray-900 dark:text-gray-200">
       <div className="w-full max-w-2xl mx-auto">
         <header className="text-center mb-8 relative">
@@ -419,6 +467,22 @@ const App = () => {
             >
               {theme === 'light' ? <MoonIcon className="h-6 w-6" /> : <SunIcon className="h-6 w-6" />}
             </button>
+            <button
+              onClick={logout}
+              data-testid="logout-btn"
+              className="p-2 rounded-full text-gray-500 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+              aria-label="Logout"
+              title="Logout"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
+          <div className="absolute top-0 left-0">
+            <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 px-2 py-1 rounded-full" data-testid="user-display">
+              {user?.full_name || user?.username}
+            </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
             Digos Doctors Hospital AI Audio Transcriber
@@ -774,6 +838,8 @@ const App = () => {
         fileName={viewingHistoryItem?.fileName || selectedFile?.name}
       />
     </div>
+    )}
+    </>
   );
 };
 

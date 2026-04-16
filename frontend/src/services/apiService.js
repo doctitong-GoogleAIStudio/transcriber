@@ -3,6 +3,23 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Get auth token from storage
+const getToken = () => {
+  const storageType = localStorage.getItem('auth_storage');
+  const storage = storageType === 'local' ? localStorage : sessionStorage;
+  return storage.getItem('auth_token');
+};
+
+// Create axios instance with auth interceptor
+const authAxios = axios.create();
+authAxios.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Helper function to convert File to base64
 export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -74,5 +91,68 @@ export const translateText = async (text, sourceLanguage) => {
     throw new Error(
       error.response?.data?.detail || 'Translation failed. Please try again.'
     );
+  }
+};
+
+// ============================================================================
+// HISTORY API (per-user, stored in MongoDB)
+// ============================================================================
+
+export const fetchHistory = async () => {
+  try {
+    const response = await authAxios.get(`${API}/history/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching history:', error);
+    return [];
+  }
+};
+
+export const createHistoryItem = async (item) => {
+  try {
+    const response = await authAxios.post(`${API}/history/`, {
+      file_name: item.fileName,
+      language: item.language,
+      transcription: item.transcription,
+      original_transcription: item.originalTranscription || null,
+      date: item.date,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating history item:', error);
+    throw new Error('Failed to save transcription history.');
+  }
+};
+
+export const updateHistoryItem = async (itemId, update) => {
+  try {
+    const payload = {};
+    if (update.transcription !== undefined) payload.transcription = update.transcription;
+    if (update.originalTranscription !== undefined) payload.original_transcription = update.originalTranscription;
+    if (update.date !== undefined) payload.date = update.date;
+
+    const response = await authAxios.put(`${API}/history/${itemId}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating history item:', error);
+    throw new Error('Failed to update history.');
+  }
+};
+
+export const deleteHistoryItem = async (itemId) => {
+  try {
+    await authAxios.delete(`${API}/history/${itemId}`);
+  } catch (error) {
+    console.error('Error deleting history item:', error);
+    throw new Error('Failed to delete history item.');
+  }
+};
+
+export const clearAllHistory = async () => {
+  try {
+    await authAxios.delete(`${API}/history/`);
+  } catch (error) {
+    console.error('Error clearing history:', error);
+    throw new Error('Failed to clear history.');
   }
 };
