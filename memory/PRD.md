@@ -5,7 +5,15 @@ An AI-powered audio to text transcription application with multi-language suppor
 
 ## Features Implemented
 
-### 1. Audio Input
+### 1. User Authentication (JWT-based)
+- **Registration**: Self-register with username, password, and optional full name
+- **Login**: Sign in with username & password, with "Remember Me" option
+- **Forgot Password**: Generate a 6-digit reset code, enter code to set new password
+- **Session Persistence**: Remember me stores token in localStorage (30-day expiry), otherwise sessionStorage (24-hour expiry)
+- **Protected Routes**: All app features gated behind authentication
+- **Per-user Data**: Each user has their own private transcription history stored in MongoDB
+
+### 2. Audio Input
 - **File Upload**: Support for multiple audio formats (MP3, WAV, M4A, WebM, etc.)
 - **Live Recording**: Real-time microphone recording with timer display
 - **File Size Limit**: Maximum 500MB per file
@@ -64,9 +72,26 @@ An AI-powered audio to text transcription application with multi-language suppor
 
 ## API Endpoints
 
-1. `POST /api/detect-language` - Auto-detect language from audio
-2. `POST /api/transcribe` - Transcribe audio to text
-3. `POST /api/translate` - Translate text to English
+### Auth
+1. `POST /api/auth/register` - Register new user (username, password, full_name)
+2. `POST /api/auth/login` - Login (username, password, remember_me)
+3. `GET /api/auth/me` - Get current user (requires Bearer token)
+4. `POST /api/auth/forgot-password` - Generate reset code
+5. `POST /api/auth/reset-password` - Reset password with code
+6. `POST /api/auth/change-password` - Change password (requires auth)
+
+### Transcription
+7. `POST /api/detect-language` - Auto-detect language from audio
+8. `POST /api/transcribe` - Transcribe audio to text
+9. `POST /api/translate` - Translate text to English
+10. `POST /api/generate-soap` - Generate SOAP clinical notes
+
+### History (protected, per-user)
+11. `GET /api/history/` - Get user's transcription history
+12. `POST /api/history/` - Save new transcription to history
+13. `PUT /api/history/{id}` - Update a history item
+14. `DELETE /api/history/{id}` - Delete a history item
+15. `DELETE /api/history/` - Clear all history
 
 ## User Flow
 

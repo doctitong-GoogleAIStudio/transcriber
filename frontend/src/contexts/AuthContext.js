@@ -72,7 +72,9 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify({ username, password, remember_me: rememberMe }),
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = {}; }
     if (!res.ok) throw new Error(data.detail || 'Login failed');
 
     saveSession(data.token, data.user, rememberMe);
@@ -86,7 +88,9 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify({ username, password, full_name: fullName || undefined }),
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = {}; }
     if (!res.ok) throw new Error(data.detail || 'Registration failed');
 
     saveSession(data.token, data.user, true);
@@ -100,7 +104,9 @@ export const AuthProvider = ({ children }) => {
       body: JSON.stringify({ username }),
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = {}; }
     if (!res.ok) throw new Error(data.detail || 'Request failed');
     return data;
   };
@@ -116,9 +122,11 @@ export const AuthProvider = ({ children }) => {
       }),
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Reset failed');
-    return data;
+    const text2 = await res.text();
+    let data2;
+    try { data2 = JSON.parse(text2); } catch { data2 = {}; }
+    if (!res.ok) throw new Error(data2.detail || 'Reset failed');
+    return data2;
   };
 
   const logout = useCallback(() => {
