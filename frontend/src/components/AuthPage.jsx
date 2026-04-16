@@ -116,14 +116,43 @@ const AuthPage = () => {
           </p>
         </div>
 
-        <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl p-6 md:p-8">
+        <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
+
+          {/* Tab Navigation - visible on login and register modes */}
+          {(mode === 'login' || mode === 'register') && (
+            <div className="flex border-b border-gray-200 dark:border-gray-700" data-testid="auth-tabs">
+              <button
+                type="button"
+                onClick={() => { clearForm(); setMode('login'); }}
+                data-testid="tab-signin"
+                className={`flex-1 py-3.5 text-center font-semibold text-sm transition-all ${
+                  mode === 'login'
+                    ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-white/30 dark:bg-gray-700/30'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/20'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { clearForm(); setMode('register'); }}
+                data-testid="tab-signup"
+                className={`flex-1 py-3.5 text-center font-semibold text-sm transition-all ${
+                  mode === 'register'
+                    ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 bg-white/30 dark:bg-gray-700/30'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/20'
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
+
+          <div className="p-6 md:p-8">
 
           {/* LOGIN */}
           {mode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-5">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center" data-testid="auth-title">
-                Sign In
-              </h2>
 
               {error && (
                 <div className="bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-2.5 rounded-lg text-sm" data-testid="auth-error">
@@ -186,27 +215,12 @@ const AuthPage = () => {
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </button>
-
-              <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                Don't have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => { clearForm(); setMode('register'); }}
-                  className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold hover:underline"
-                  data-testid="switch-to-register"
-                >
-                  Sign Up
-                </button>
-              </p>
             </form>
           )}
 
           {/* REGISTER */}
           {mode === 'register' && (
             <form onSubmit={handleRegister} className="space-y-5">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center" data-testid="auth-title">
-                Create Account
-              </h2>
 
               {error && (
                 <div className="bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-2.5 rounded-lg text-sm" data-testid="auth-error">
@@ -273,18 +287,6 @@ const AuthPage = () => {
               >
                 {isLoading ? 'Creating account...' : 'Create Account'}
               </button>
-
-              <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => { clearForm(); setMode('login'); }}
-                  className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold hover:underline"
-                  data-testid="switch-to-login"
-                >
-                  Sign In
-                </button>
-              </p>
             </form>
           )}
 
@@ -413,6 +415,7 @@ const AuthPage = () => {
               </p>
             </form>
           )}
+          </div>
         </div>
 
         <footer className="text-center mt-6">
