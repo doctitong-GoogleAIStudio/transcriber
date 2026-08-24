@@ -158,6 +158,45 @@ async def generate_soap_summary(request: SOAPRequest):
         logger.error(f"SOAP generation error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# AI Summary
+class SummaryRequest(BaseModel):
+    transcription: str
+    language: str
+
+class SummaryResponse(BaseModel):
+    summary: str
+
+@api_router.post("/generate-summary", response_model=SummaryResponse)
+async def generate_summary(request: SummaryRequest):
+    try:
+        summary = await gemini_service.generate_summary(
+            transcription=request.transcription,
+            language=request.language
+        )
+        return SummaryResponse(summary=summary)
+    except Exception as e:
+        logger.error(f"Summary generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# AI Insights (mode-specific)
+class InsightsRequest(BaseModel):
+    transcription: str
+    language: str
+    mode: str = "general"
+
+@api_router.post("/generate-insights")
+async def generate_insights(request: InsightsRequest):
+    try:
+        insights = await gemini_service.generate_insights(
+            transcription=request.transcription,
+            language=request.language,
+            mode=request.mode
+        )
+        return {"sections": insights, "mode": request.mode}
+    except Exception as e:
+        logger.error(f"Insights generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # Include routers
 app.include_router(api_router)

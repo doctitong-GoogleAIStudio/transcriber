@@ -1,120 +1,96 @@
-# Product Requirements Document: AI Audio Transcriber
+# Product Requirements Document — DDH AI Audio Transcriber
 
-## Overview
-An AI-powered audio to text transcription application with multi-language support, live recording, and translation capabilities.
+## Original Problem Statement
+Create an app based on the uploaded DIDH-AI-Audio-Transcriber-main.zip file. Change the name to "Digos Doctors Hospital AI Audio Transcriber". Integrate AI for transcription, translation, and auto-generating SOAP summaries. Convert to a Progressive Web App (PWA). Add a share feature for PDF/TXT downloads. Add username/password authentication. Redesign as mobile-first app with new home screen and post-processing tabs.
+
+## Architecture
+- Frontend: React.js + Tailwind CSS (mobile-first PWA)
+- Backend: FastAPI + MongoDB
+- AI: Google Gemini 2.5 Flash via emergentintegrations
+- Auth: JWT-based with bcrypt password hashing
+- Design: Emerald/green theme, Manrope headings, Figtree body
 
 ## Features Implemented
 
 ### 1. User Authentication (JWT-based)
-- **Registration**: Self-register with username, password, and optional full name
-- **Login**: Sign in with username & password, with "Remember Me" option
-- **Forgot Password**: Generate a 6-digit reset code, enter code to set new password
-- **Session Persistence**: Remember me stores token in localStorage (30-day expiry), otherwise sessionStorage (24-hour expiry)
-- **Protected Routes**: All app features gated behind authentication
-- **Per-user Data**: Each user has their own private transcription history stored in MongoDB
+- Self-registration with username, password, optional full name
+- Login with "Remember Me" (30-day token in localStorage vs 24-hour sessionStorage)
+- Forgot Password with 6-digit reset code
+- Protected routes — all app features gated behind auth
 
-### 2. Audio Input
-- **File Upload**: Support for multiple audio formats (MP3, WAV, M4A, WebM, etc.)
-- **Live Recording**: Real-time microphone recording with timer display
-- **File Size Limit**: Maximum 500MB per file
+### 2. Mobile-First UI (v1.3.0)
+- **Home Screen**: Record Audio, Upload Audio, My Transcripts
+- **Bottom Navigation**: Home, Record (center), Transcripts, Settings
+- **Recording View**: Timer, mic button, pulse animation
+- **Processing View**: Language detection, mode selection, transcribe button
+- **TranscriptionView**: 4 tabs — Transcript, Summary, AI Insights, Translation
+- **Transcripts List**: Searchable history with delete per item
+- **Settings**: User profile, Dark Mode toggle, About, Sign Out
 
-### 2. Language Support
-- **Auto-Detection**: Automatic language detection from audio files
-- **23 Languages**: Including Filipino languages (Tagalog, Cebuano, Ilocano, Ilonggo, Bikol, Waray), English, and major international languages
-- **Language Selection**: Dropdown menu for manual language selection
+### 3. Mode Selector
+- 5 modes: General, Meeting, Medical, Lecture, Interview
+- Selectable before and after transcription
+- Each mode generates different AI insights
 
-### 3. Transcription
-- **AI-Powered**: Using Google Gemini 2.5 Flash model
-- **Real-time Processing**: Transcription with loading indicators
-- **Editable Results**: Users can edit transcription text
-- **Multi-language**: Accurate transcription in selected language
+### 4. AI-Powered Features
+- **Transcription**: Audio → text via Gemini 2.5 Flash
+- **Language Detection**: Auto-detect from 23+ languages
+- **Translation**: Any language → English
+- **AI Summary**: Concise 3-5 paragraph summary
+- **AI Insights**: Mode-specific analysis
+  - General: Overview, Key Points, Notable Quotes, Follow-up
+  - Meeting: Discussion, Decisions, Action Items, Responsible, Deadlines
+  - Medical: SOAP notes with consent disclaimer
+  - Lecture: Key Points, Definitions, Notes, Review Questions
+  - Interview: Participants, Dialogue, Key Takeaways
 
-### 4. Translation
-- **English Translation**: Translate any transcription to English
-- **Toggle View**: Switch between original and translated text
-- **Preserve Original**: Keep both original and translated versions
+### 5. Export & Share
+- PDF export (via jspdf)
+- TXT download
+- Copy to clipboard
+- Upper case toggle
 
-### 5. History Management
-- **Local Storage**: Persistent history saved in browser
-- **View History**: Click to load previous transcriptions
-- **Edit & Save**: Modify and save changes to history items
-- **Delete Items**: Remove individual history entries
-- **Clear All**: Clear entire history with confirmation
-
-### 6. User Interface
-- **Theme Toggle**: Light/dark mode with animated transition
-- **Animated Background**: Gradient animation with glass morphism effects
-- **Responsive Design**: Works on desktop and mobile devices
-- **About Modal**: Information about the app and developer
-- **Action Buttons**: Copy, Download, Save edits functionality
-- **Upper Case Toggle**: Convert transcription text display to all uppercase letters (affects display, copy, and download)
-
-### 7. Backend Integration
-- **FastAPI**: RESTful API endpoints
-- **Google Gemini API**: Audio transcription and translation via emergentintegrations
-- **Error Handling**: Comprehensive error messages
-- **CORS Support**: Cross-origin requests enabled
-
-## Technical Stack
-
-### Frontend
-- React 19.0.0
-- Tailwind CSS
-- Axios for API calls
-- LocalStorage for persistence
-
-### Backend
-- FastAPI
-- MongoDB (for future features)
-- emergentintegrations library
-- Google Gemini 2.5 Flash model
-- Emergent LLM Key for authentication
+### 6. PWA
+- Service worker, manifest.json
+- Installable on mobile
+- Offline-capable recording (future)
 
 ## API Endpoints
 
 ### Auth
-1. `POST /api/auth/register` - Register new user (username, password, full_name)
-2. `POST /api/auth/login` - Login (username, password, remember_me)
-3. `GET /api/auth/me` - Get current user (requires Bearer token)
-4. `POST /api/auth/forgot-password` - Generate reset code
-5. `POST /api/auth/reset-password` - Reset password with code
-6. `POST /api/auth/change-password` - Change password (requires auth)
+- POST /api/auth/register
+- POST /api/auth/login
+- GET /api/auth/me
+- POST /api/auth/forgot-password
+- POST /api/auth/reset-password
+- POST /api/auth/change-password
 
 ### Transcription
-7. `POST /api/detect-language` - Auto-detect language from audio
-8. `POST /api/transcribe` - Transcribe audio to text
-9. `POST /api/translate` - Translate text to English
-10. `POST /api/generate-soap` - Generate SOAP clinical notes
+- POST /api/detect-language
+- POST /api/transcribe
+- POST /api/translate
+- POST /api/generate-summary
+- POST /api/generate-insights
+- POST /api/generate-soap
 
 ### History (protected, per-user)
-11. `GET /api/history/` - Get user's transcription history
-12. `POST /api/history/` - Save new transcription to history
-13. `PUT /api/history/{id}` - Update a history item
-14. `DELETE /api/history/{id}` - Delete a history item
-15. `DELETE /api/history/` - Clear all history
-
-## User Flow
-
-1. User uploads audio file or records live
-2. System auto-detects language
-3. User confirms or changes language
-4. User clicks "Transcribe Audio"
-5. System processes and displays transcription
-6. User can edit, copy, download, or translate
-7. Transcription saved to history automatically
-8. User can access history anytime
-
-## Design Features
-
-- Purple-to-indigo gradient text for headers
-- Animated gradient background (light/dark themes)
-- Glass morphism card effects with backdrop blur
-- Smooth transitions and hover effects
-- Loading spinners for async operations
-- Error messages with red styling
-- Success indicators for copy/save actions
+- GET /api/history/
+- POST /api/history/
+- PUT /api/history/{id}
+- DELETE /api/history/{id}
+- DELETE /api/history/
 
 ## Version
-- Version 1.2.2 (Build 20260325.1)
+- Version 1.3.0
 - Developed by Vicente C. Cavalida, Jr. MD
-- Powered by Google Gemini
+- Powered by Google Gemini 2.5 Flash
+
+## Upcoming Features (Phase 2-4)
+- Speaker Identification (label Speaker 1, 2 etc)
+- Ask the Recording (AI Q&A about transcript)
+- Search Transcript (search + jump to timestamp)
+- Live Recording + Live Transcription
+- DOCX export
+- Audio + Transcript Archive (searchable by title, date, category, speaker)
+- Privacy Controls (deletion, retention, consent indicators)
+- Offline Recording (process when connectivity returns)

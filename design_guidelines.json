@@ -1,0 +1,106 @@
+{
+  "theme": "Light mode default (Medical context)",
+  "typography": {
+    "headings": {
+      "font_family": "Manrope",
+      "weights": ["600", "800"],
+      "usage": "Use for all primary headers, tab titles, and numbers/metrics. Tight letter spacing (`tracking-tight`) for sizes > 32px. DO NOT use generic fonts like Inter for headings.",
+      "hierarchy": {
+        "H1": "text-3xl sm:text-4xl (Mobile-first sizing)",
+        "H2": "text-2xl sm:text-3xl",
+        "H3": "text-xl sm:text-2xl",
+        "H4": "text-lg sm:text-xl"
+      }
+    },
+    "body": {
+      "font_family": "Figtree",
+      "weights": ["400", "500"],
+      "usage": "Use for transcripts, form labels, and body copy. Highly legible for dense medical data.",
+      "sizes": {
+        "base": "text-base (minimum for reading transcripts)",
+        "small": "text-sm",
+        "tiny": "text-xs uppercase tracking-[0.2em] for overlines/labels"
+      }
+    }
+  },
+  "colors": {
+    "archetype": "Organic & Earthy + Swiss Precision (Clean, Authoritative, Trustworthy)",
+    "palette": {
+      "background": "#F9FAFB (Bone White) - Base app background",
+      "surface": "#FFFFFF (Pure White) - For cards and readable areas",
+      "primary": "#064E3B (Emerald-900) - For primary actions, bottom nav active states, and clinical authority",
+      "primary_hover": "#047857 (Emerald-700)",
+      "accent": "#10B981 (Emerald-500) - For AI Insights and positive indicators",
+      "text_primary": "#0F172A (Deep Slate) - High contrast against light backgrounds",
+      "text_secondary": "#475569 (Slate-600)",
+      "recording_active": "#EF4444 (Red-500) - For live recording indicator",
+      "border": "#E2E8F0 (Slate-200) - 1px solid for crisp separation"
+    },
+    "rules": [
+      "No full-screen gradients. Keep the UI flat and clinical.",
+      "DO NOT use teal green/blue (#1B93A4).",
+      "Maintain a minimum 4.5:1 contrast ratio for all text.",
+      "Never use pure black or pure gray; always tint greys slightly with slate/blue."
+    ]
+  },
+  "visual_enhancers": {
+    "surfaces": "Use flat solid surfaces. NO GLASSMORPHISM. Medical apps require optical clarity to prevent visual refraction of data. Use warm solid backgrounds with subtle 1px borders.",
+    "borders": "1px solid borders (`border-slate-200`) on cards and containers. Very subtle border radius (`rounded-xl` or `rounded-2xl` for mobile containers).",
+    "shadows": "Minimal. Use ambient drop shadows only on floating elements like sticky bottom nav or action sheets (`shadow-[0_4px_24px_rgba(0,0,0,0.06)]`).",
+    "touch_targets": "CRITICAL: Minimum touch target size of 48x48px for all interactive elements to accommodate users wearing medical gloves."
+  },
+  "components_and_layout": {
+    "layout_strategy": "Mobile-First Progressive Web App (PWA). Wrap the main app inside a container (e.g., `max-w-md mx-auto`) with a fixed bottom navigation bar on desktop to preserve the mobile feel.",
+    "navigation": "Bottom Navigation Bar is MANDATORY for the PWA structure. Include: Record (Center/Prominent), Upload, Transcripts, Settings. Must have a safe-area inset at the bottom.",
+    "home_screen": "Extremely simple. Focus on a massive 'Record' button (circular, heavily padded, pulsing when active) and 'Upload Audio' secondary action.",
+    "post_processing_tabs": "Use a scrollable horizontal tab list or standard Tab component for: Transcript | Summary | AI Insights | Translation. Ensure the active tab has a high-contrast underline or solid background pill.",
+    "cards": "Cardless layout where possible, or flat cards with 1px border. Do not overuse Shadcn 'Card' with heavy shadows. Use `div` with padding and borders.",
+    "mode_selector": "Pill-shaped toggle group (General, Meeting Minutes, Medical/Clinical, Lecture, Interview). Must be horizontally scrollable on mobile."
+  },
+  "motion": {
+    "philosophy": "Functional and reassuring. Avoid distracting animations.",
+    "recording": "Subtle Framer Motion pulsing ring (`scale` and `opacity`) on the active record button.",
+    "transitions": "Smooth fade (`opacity: 0` to `opacity: 1`) between the 4 main tabs.",
+    "toasts": "Use `sonner` for all notifications (e.g., 'Audio processed', 'Transcript saved')."
+  },
+  "accessibility": {
+    "contrast": "Adhere strictly to APCA / WCAG AA contrast rules.",
+    "motion": "Respect `prefers-reduced-motion`.",
+    "attributes": "CRITICAL: All interactive elements MUST include `data-testid` attributes (e.g., `data-testid=\"record-button\"`, `data-testid=\"tab-transcript\"`)."
+  },
+  "media": {
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1617994452722-4145e196248b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwxfHxzb3VuZCUyMHdhdmUlMjBhYnN0cmFjdHxlbnwwfHx8fDE3ODc1NTIzNTd8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Blue abstract sound wave on black",
+        "category": "Use sparingly as a background accent in the 'Recording' state or 'AI Insights' hero section if a dark mode / high-contrast block is needed."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1574958269340-fa927503f3dd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwyfHxob3NwaXRhbCUyMGJ1aWxkaW5nJTIwZXh0ZXJpb3J8ZW58MHx8fHwxNzg3NTUyMzU3fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Modern hospital building exterior",
+        "category": "Authentication screen background or Welcome screen header imagery."
+      }
+    ],
+    "icons": "Use `lucide-react` for all icons. Standardize stroke width to 1.5 or 2."
+  },
+  "instructions_to_main_agent": [
+    "You are building a Mobile Web App (PWA) using React (.js files) and Tailwind CSS.",
+    "Ensure the layout mimics a native mobile app. Use a fixed bottom navigation bar and scrollable main content areas (`overflow-y-auto`, `pb-24` to clear the nav).",
+    "Do NOT use HTML-based components for advanced interactions. Use Shadcn UI (modified for flat design).",
+    "Do NOT center align the entire app container text. Keep text left-aligned for reading transcripts.",
+    "All components must be written in `.js` (JSX), NOT `.tsx`.",
+    "Avoid using glassmorphism. Stick to solid backgrounds with sharp, accessible contrasts.",
+    "Add `data-testid` to all buttons, tabs, inputs, and links.",
+    "Ensure 'Medical/Clinical' mode and other modes are selectable easily via horizontal scrolling pills."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Create depth through layered design elements with z-index hierarchy.",
+    "You MUST NOT apply universal transition (e.g., `transition: all`). Use specific transitions.",
+    "You MUST NOT center align the app container, i.e., do not add `.App { text-align: center; }`.",
+    "Always use modern button styles (pill-shaped or sharp) with interaction animations.",
+    "NEVER use AI assistant Emoji characters (🤖, 🧠) for icons. Use proper SVG icons (lucide-react).",
+    "Prioritize using pre-existing components from src/components/ui.",
+    "Use `sonner` for toasts.",
+    "Generate .js files only."
+  ]
+}
