@@ -65,7 +65,7 @@ const SettingsView = ({ onOpenAbout }) => {
       </button>
 
       <p className="text-center text-xs text-slate-400 mt-6">
-        Version 1.3.0 &middot; Digos Doctors Hospital
+        Version 1.3.0 &middot; &copy; {new Date().getFullYear()} Smart Transcriber. All rights reserved.
       </p>
     </div>
   );

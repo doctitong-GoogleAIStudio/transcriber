@@ -421,6 +421,67 @@ P: [Plan/Treatment]
         
         return soap_dict
 
+    async def identify_speakers(self, transcription: str, language: str) -> str:
+        """Identify and label different speakers in a transcription."""
+        try:
+            session_id = f"speakers_{id(transcription)}"
+            prompt = f"""Analyze this transcription and identify different speakers. Reformat the text with speaker labels.
+
+Rules:
+- Label speakers as "Speaker 1:", "Speaker 2:", etc.
+- If the context makes roles clear (e.g., Doctor/Patient, Interviewer/Interviewee), you may note that in parentheses: "Speaker 1 (Doctor):"
+- Preserve the original text as closely as possible
+- Each time a different person speaks, start a new line with their speaker label
+- If there is only one speaker, label them as "Speaker 1:"
+
+Transcription (in {language}):
+\"\"\"
+{transcription}
+\"\"\"
+
+Return ONLY the reformatted text with speaker labels. No other commentary."""
+
+            user_message = UserMessage(text=prompt)
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=session_id,
+                system_message="You are an expert at identifying different speakers in transcribed audio."
+            ).with_model("gemini", "gemini-2.5-flash")
+
+            response = await chat.send_message(user_message)
+            return response.strip()
+        except Exception as e:
+            print(f"Error in speaker identification: {str(e)}")
+            raise Exception(f"Speaker identification failed: {str(e)}")
+
+    async def ask_recording(self, transcription: str, language: str, question: str) -> str:
+        """Answer a question about the transcription content."""
+        try:
+            session_id = f"ask_{id(question)}"
+            prompt = f"""Based on the following transcription, answer this question accurately and concisely.
+
+Question: {question}
+
+Transcription (in {language}):
+\"\"\"
+{transcription}
+\"\"\"
+
+Provide a clear, direct answer based ONLY on what is in the transcription. If the answer cannot be found in the transcription, say "This information is not found in the recording." Keep your answer concise but thorough."""
+
+            user_message = UserMessage(text=prompt)
+            chat = LlmChat(
+                api_key=self.api_key,
+                session_id=session_id,
+                system_message="You answer questions about transcribed audio content accurately and concisely."
+            ).with_model("gemini", "gemini-2.5-flash")
+
+            response = await chat.send_message(user_message)
+            return response.strip()
+        except Exception as e:
+            print(f"Error in ask recording: {str(e)}")
+            raise Exception(f"Ask recording failed: {str(e)}")
+
 
 # Singleton instance
 gemini_service = GeminiService()

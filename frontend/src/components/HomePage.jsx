@@ -19,7 +19,7 @@ const HomePage = ({ onNavigate, onFileSelect, historyCount }) => {
     <div className="px-4 pt-6 pb-safe max-w-md mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100" data-testid="home-title">
-          DDH Transcriber
+          Smart Transcriber
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           AI-powered audio transcription & analysis

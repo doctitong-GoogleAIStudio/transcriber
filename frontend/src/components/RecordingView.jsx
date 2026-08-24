@@ -1,16 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Square, ChevronLeft } from 'lucide-react';
+import { Mic, Square, ChevronLeft, WifiOff, Wifi } from 'lucide-react';
+import { savePendingRecording } from '../services/offlineQueue';
 
 const RecordingView = ({ onRecordingComplete, onBack }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [error, setError] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [savedOffline, setSavedOffline] = useState(false);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
 
   useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
     return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
       if (timerRef.current) clearInterval(timerRef.current);
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
@@ -27,6 +36,7 @@ const RecordingView = ({ onRecordingComplete, onBack }) => {
   const startRecording = async () => {
     try {
       setError(null);
+      setSavedOffline(false);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -36,11 +46,22 @@ const RecordingView = ({ onRecordingComplete, onBack }) => {
         if (event.data.size > 0) audioChunksRef.current.push(event.data);
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const file = new File([audioBlob], `recording-${Date.now()}.webm`, { type: 'audio/webm' });
         stream.getTracks().forEach((t) => t.stop());
-        onRecordingComplete(file);
+
+        if (navigator.onLine) {
+          onRecordingComplete(file);
+        } else {
+          // Save offline
+          try {
+            await savePendingRecording(file);
+            setSavedOffline(true);
+          } catch (e) {
+            setError('Failed to save recording offline.');
+          }
+        }
       };
 
       mediaRecorder.start();
@@ -72,6 +93,21 @@ const RecordingView = ({ onRecordingComplete, onBack }) => {
       </button>
 
       <div className="flex-1 flex flex-col items-center justify-center">
+        {/* Connectivity status */}
+        {!isOnline && (
+          <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 px-4 py-2.5 rounded-xl text-sm mb-6 w-full" data-testid="offline-banner">
+            <WifiOff className="h-4 w-4 flex-shrink-0" />
+            <span>You're offline. Recording will be saved and processed when connectivity returns.</span>
+          </div>
+        )}
+
+        {savedOffline && (
+          <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 px-4 py-3 rounded-xl text-sm mb-6 w-full" data-testid="saved-offline-msg">
+            <Wifi className="h-4 w-4 flex-shrink-0" />
+            <span>Recording saved offline! It will auto-process when you're back online.</span>
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm mb-6 w-full" data-testid="recording-error">
             {error}

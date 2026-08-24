@@ -113,6 +113,6 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('DDH Transcriber', options)
+    self.registration.showNotification('Smart Transcriber', options)
   );
 });

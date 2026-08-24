@@ -197,6 +197,42 @@ async def generate_insights(request: InsightsRequest):
         logger.error(f"Insights generation error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Speaker Identification
+class SpeakerRequest(BaseModel):
+    transcription: str
+    language: str
+
+@api_router.post("/identify-speakers")
+async def identify_speakers(request: SpeakerRequest):
+    try:
+        labeled_text = await gemini_service.identify_speakers(
+            transcription=request.transcription,
+            language=request.language
+        )
+        return {"labeled_transcription": labeled_text}
+    except Exception as e:
+        logger.error(f"Speaker identification error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Ask the Recording
+class AskRequest(BaseModel):
+    transcription: str
+    language: str
+    question: str
+
+@api_router.post("/ask-recording")
+async def ask_recording(request: AskRequest):
+    try:
+        answer = await gemini_service.ask_recording(
+            transcription=request.transcription,
+            language=request.language,
+            question=request.question
+        )
+        return {"answer": answer, "question": request.question}
+    except Exception as e:
+        logger.error(f"Ask recording error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # Include routers
 app.include_router(api_router)

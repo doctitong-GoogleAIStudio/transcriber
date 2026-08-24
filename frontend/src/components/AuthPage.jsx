@@ -109,7 +109,7 @@ const AuthPage = () => {
       <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-extrabold text-emerald-800 dark:text-emerald-400" style={{ fontFamily: "'Manrope', sans-serif" }}>
-            DDH Transcriber
+            Smart Transcriber
           </h1>
           <p className="text-base font-medium text-slate-500 dark:text-slate-400 mt-1">
             AI Audio Transcriber
@@ -419,9 +419,7 @@ const AuthPage = () => {
         </div>
 
         <footer className="text-center mt-6">
-          <p className="text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} Digos Doctors Hospital AI Audio Transcriber
-          </p>
+          <p className="text-xs text-slate-400">&copy; {new Date().getFullYear()} Smart Transcriber. All rights reserved.</p>
         </footer>
       </div>
     </div>

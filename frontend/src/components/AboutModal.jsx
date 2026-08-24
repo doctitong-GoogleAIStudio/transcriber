@@ -21,7 +21,7 @@ export const AboutModal = ({ isOpen, onClose }) => {
           <X className="h-5 w-5" />
         </button>
         <h2 className="text-xl font-extrabold text-emerald-800 dark:text-emerald-400 mb-3" style={{ fontFamily: "'Manrope', sans-serif" }}>
-          DDH AI Audio Transcriber
+          Smart Transcriber
         </h2>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
           AI-powered audio transcription with multi-language support, clinical SOAP notes, meeting minutes, lecture notes, and more.
@@ -52,8 +52,8 @@ export const AboutModal = ({ isOpen, onClose }) => {
         <div className="text-xs text-slate-500 border-t border-slate-200 dark:border-slate-700 pt-3 mt-3">
           <p className="font-medium text-slate-700 dark:text-slate-300 mb-1">Developed by Vicente C. Cavalida, Jr. MD</p>
           <p className="mb-0.5"><strong>Version:</strong> 1.3.0</p>
-          <p className="mb-0.5"><strong>AI Model:</strong> Google Gemini 2.5 Flash</p>
-          <p>&copy; {new Date().getFullYear()} Digos Doctors Hospital. All rights reserved.</p>
+          <p><strong>AI Model:</strong> Google Gemini 2.5 Flash</p>
+          <p className="mt-2">&copy; {new Date().getFullYear()} Smart Transcriber. All rights reserved.</p>
         </div>
       </div>
     </div>
